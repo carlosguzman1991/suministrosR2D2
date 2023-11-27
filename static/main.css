@@ -1,0 +1,60 @@
+body {
+    background: #004FF9;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #FFF94C, #004FF9);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #FFF94C, #004FF9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+.titulo {
+    font-family: 'Indie Flower', cursive;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+.alerta-roja {
+    background-color: red;
+    color: white;
+}
+/* ocultar y mostrar elementos */
+.hidden {
+    display: none;
+}
+
+/* para Agregar Producto Nuevo */
+#mostrar_formulario {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Estilos para el botón "Agregar al Carrito" */
+.btn-text {
+    background-color: #007bff; /* color de fondo a tu elección */
+    color: #fff; /* Color de texto a tu elección */
+    padding: 10px 10x; /* Ajusta el espaciado interno según tus preferencias */
+    border: none;
+    border-radius: 5px; /* Ajusta el radio del borde para redondear el botón */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Agrega una transición suave al cambiar el color de fondo */
+
+    /* Estilos adicionales cuando el cursor pasa sobre el botón */
+    &:hover {
+        background-color: #0056b3; /* Cambia el color de fondo al pasar el cursor */
+    }
+}
+
+/* Estilos para el campo de entrada de cantidad */
+.quantity-input {
+    width: 100px; /* Ajusta el ancho según tus preferencias */
+    padding: 5px;
+    text-align: center; /* Centrar el texto en el campo de entrada */
+    border: 1px solid #ccc; /* Agregar un borde al campo de entrada */
+    border-radius: 5px; /* radio del borde para redondear el campo */
+}
+
+#carrito-container {
+    position: absolute;
+    top: 340px; /* Ajusta la distancia desde la parte superior */
+    right: 180px; /* Ajusta la distancia desde la derecha */
+}
+
+.carrito-icon {
+    width: 32px;
+    height: 32px;
+}
+

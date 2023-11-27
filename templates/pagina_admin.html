@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ADMINISTRADOR</title>
+    <!--boorstrap-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/yeti/bootstrap.min.css" integrity="sha384-mLBxp+1RMvmQmXOjBzRjqqr0dP9VHU2tb3FK6VB0fJN/AOu7/y+CAeYeWJZ4b3ii" crossorigin="anonymous">
+    <!--fuente de google fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Roboto+Condensed&display=swap" rel="stylesheet">
+    <!--estilo de hoja main.css-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <main class="container p-4">
+        <h1 class="display-4 text-center mt-4" titulo>bienvenido a pagina_Admin.html</h1> <!--titulo principal de la pagina-->
+        <table> <!-- Tabla para mostrar los productos -->
+          <tr>
+            <th>ID Producto|</th>
+            <th>Nombre Producto|</th>
+            <th>Proveedor|</th>
+            <th>Precio de Compra|</th>
+            <th>Precio de Venta|</th>
+            <th>Stock|</th>
+            <th>Stock Máximo|</th>
+            <th>Alerta de Compra</th>
+          </tr>
+          {% for p in productos %}
+            <td>{{p.id_producto}}</td>
+            <td>{{p.nombre_producto}}</td>
+            <td>{{p.proveedor }}</td>
+            <td>{{p.precio_compra}}</td>
+            <td>{{p.precio_venta}}</td>
+            <td>{{p.stock }}</td>
+            <td>{{p.stock_Maximo }}</td>
+            <td style="color: {% if p.stock < 0.9 * p.stock_Maximo %}red{% endif %};">
+                {% if p.stock < 0.9 * p.stock_Maximo %}¡Alerta!{% endif %}
+            </td>
+            </tr>
+          {% endfor %}
+        </table>
+        <!-- Botón para agregar un nuevo producto -->
+        <button id="mostrar_formulario" onclick="mostrarFormulario()">Agregar Producto Nuevo</button>
+        <!--formulario para agregar el producto nuevo-->
+        <div id="contenedor_formulario" style="display: none;">
+            <h2>Agregar Nuevo Producto</h2> <!--agregar nuevos productos a la bse de datos-->
+            <form method="POST" action="{{ url_for('agregar_producto') }}" id="formulario_agregar_producto">
+                <label for="nombre">Nombre del Producto:</label>
+                <input type="text" id="nombre" name="nombre" required>
+                <label for="proveedor">Proveedor:</label>
+                <select id="proveedor" name="proveedor" required>
+                    {% for proveedor in proveedores %}
+                    <option value="{{ proveedor.id_proveedor }}">{{ proveedor.nombre_proveedor }}</option>
+                    {% endfor %}
+                </select>
+                <label for="precio_compra">Precio de Compra:</label>
+                <input type="number" id="precio_compra" name="precio_compra" required>
+                <label for="precio_venta">Precio de Vcenta:</label>
+                <input type="number" id="precio_venta" name="precio_venta" required>
+                <label for="stock">Stock:</label>
+                <input type="number" id="stock" name="stock" required>
+                <label for="stock_maximo">Stock Máximo:</label>
+                <input type="number" id="stock_maximo" name="stock_maximo" required>
+                <input type="hidden" id="alerta_compra" name="alerta_compra"> <!--esta linea esta oculta para ue calcule automaticamente despues el 90% del stock-->
+                <input type="submit" value="Agregar Producto">
+            </form>
+        </div>
+    </main>
+    <script>
+    function mostrarFormulario() {
+        var formulario = document.getElementById("contenedor_formulario");
+        var botonMostrar = document.getElementById("mostrar_formulario");
+
+        if (formulario.style.display === "none") {
+            formulario.style.display = "block";
+            botonMostrar.innerText = "Ocultar Formulario";
+        } else {
+            formulario.style.display = "none";
+            botonMostrar.innerText = "Agregar Producto Nuevo";
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+        const stock = parseInt(document.getElementById('stock').value);
+        const stockMaximo = parseInt(document.getElementById('stock_maximo').value);
+        const alertaCompra = document.getElementById('alerta_compra');
+        if (stock < 0.9 * stockMaximo) {
+            alertaCompra.value = '¡Alerta!';
+        } else {
+            alertaCompra.value = '';
+        }
+    });
+    </script>
+</body>
+</html>

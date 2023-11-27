@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Suministros R2D2</title>
+    <!--boorstrap-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/yeti/bootstrap.min.css" integrity="sha384-mLBxp+1RMvmQmXOjBzRjqqr0dP9VHU2tb3FK6VB0fJN/AOu7/y+CAeYeWJZ4b3ii" crossorigin="anonymous">
+    <!--fuente de google fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Roboto+Condensed&display=swap" rel="stylesheet">
+    <!--estilo de hoja main.css-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="container p-4">
+         <!-- Logo de la página -->
+        <div class="text-center mt-4">
+            <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="Logo de la página">
+        </div>
+        <button type="button" class="btn btn-primary btn-sm"  onclick="mostrarFormulario('cliente')">Cliente</button> <!--boton de inicio cliente-->
+        <button type="button" class="btn btn-secondary btn-sm" onclick="mostrarFormulario('admin')">Admin</button> <!-- boton de inicio admin-->
+        <button type="button" class="btn btn-dark" id="nuevo-cliente" onclick="mostrarFormulario('registro-cliente')">Nuevo cliente</button> <!--para nuevo cliente-->
+        <h1>Iniciar sesión</h1>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+        <!--como cliente-->
+        <form method="POST" id="login-form" class="hidden" action="{{ url_for('login_cliente') }}">
+            <label for="usuario">Usuario:</label>
+            <input type="text" name="usuario" id="usuario" required>
+            <br>
+            <label for="contraseña">Contraseña:</label>
+            <input type="password" name="contraseña" id="contraseña" required>
+            <br>
+            <input type="submit" value="Iniciar sesión">
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+        </form>
+        <!--como admin-->
+        <form method="POST" id="login-form-admin" class="hidden" action="{{ url_for('login_admin') }}">
+            <label for="usuario">Usuario:</label>
+            <input type="text" name="usuario" id="usuario" required>
+            <br>
+            <label for="contraseña">Contraseña:</label>
+            <input type="password" name="contraseña" id="contraseña" required>
+            <br>
+            <input type="submit" value="Iniciar sesión">
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+        </form>
+        <!-- registro_cliente -->
+        <form method="POST" id="registro-cliente-form" class="hidden" action="{{ url_for('registro_cliente') }}">
+          <label for="nombre">Nombre Cliente:</label>
+          <input type="text" id="nombre" name="nombre" required>
+          <br>
+          <label for="contraseña">Contraseña:</label>
+          <input type="password" id="contraseña" name="contraseña" required>
+          <br>
+          <label for="direccion">Direccion Cliente:</label>
+          <input type="text" id="direccion" name="direccion" required>
+          <br>
+          <input type="submit" value="Registrarse">
+        </form>
+        <!-- registro_admin -->
+        <form method="POST" id="registro-admin-form" class="hidden" action="{{ url_for('registro_admin') }}">
+          <label for="nombre">Nombre Admin:</label>
+          <input type="text" name="nombre" id="nombre" required>
+          <br>
+          <label for="contraseña">Contraseña:</label>
+          <input type="password" name="contraseña" id="contraseña" required>
+          <br>
+          <input type="submit" value="Registrarse">
+        </form>
+    </main>
+    <script>
+        function mostrarFormulario(tipo) {
+            if (tipo === 'cliente') {
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('registro-cliente-form').classList.add('hidden');
+                document.getElementById('registro-admin-form').classList.add('hidden');
+            } else if (tipo === 'admin') {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('registro-cliente-form').classList.add('hidden');
+                document.getElementById('login-form-admin').classList.remove('hidden');
+            } else if (tipo === 'registro-cliente') {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('registro-cliente-form').classList.remove('hidden');
+                document.getElementById('registro-admin-form').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

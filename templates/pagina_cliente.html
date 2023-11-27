@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido sr.cliente</title>
+    <script type="text/javascript">
+        // Asigna el ID de cliente de la sesión a una variable JavaScript
+        var ClienteID = "{{ session.get('cliente_id', 'Usuario no registrado') }}";
+    </script>
+    <script type="text/javascript">
+        // Asigna la dirección del cliente a una variable JavaScript
+        var clienteDireccion = "{{ direccion_cliente }}" || null;  // Usa null si no hay dirección
+    </script>
+    <!--boorstrap-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/yeti/bootstrap.min.css" integrity="sha384-mLBxp+1RMvmQmXOjBzRjqqr0dP9VHU2tb3FK6VB0fJN/AOu7/y+CAeYeWJZ4b3ii" crossorigin="anonymous">
+    <!--fuente de google fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Roboto+Condensed&display=swap" rel="stylesheet">
+    <!--estilo de hoja main.css-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <main class="container p-4">
+        <h1 class="display-4 text-center mt-4" titulo>Bienvenido a su pagina de compra</h1> <!--titulo principal de la pagina-->
+         <!-- Logo de la página -->
+        <div class="text-center mt-4">
+            <img src="{{ url_for('static', filename='logos/logo.png') }}" alt="Logo de la página">
+        </div>
+        <header>
+            <!-- Imagen del carrito -->
+            <div id="carrito-container">
+                <a href="#" id="carrito-link">
+                    <img src="{{ url_for('static', filename='logos/carrito.png') }}" alt="Carrito de Compras">
+                </a>
+            </div>
+            <div class="modal" id="carritoModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Carrito de Compras</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- contenido del carrito -->
+                            <ul id="carrito-lista"></ul>
+                            <p id="carrito-total"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="aceptar-carrito">Aceptar</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </header>
+        <!--// añadir modal con toggle show/hide y con los elementos del carrito - nombre de producto, cantidad, total. Añadir total de todo el carrito.-->
+        <!-- Mensaje de lista de productos -->
+        <h2 class="mt-4 titulo">Productos disponibles</h2>
+
+        <!-- Tabla de productos -->
+        <table class="table table-striped">
+            <tr>
+                <th>Producto</th>
+                <th>Unidades Disponibles</th>
+                <th>Precio de Venta</th>
+                <th>Imagen</th>
+                <th>Descripción</th>
+                <th>Agregar producto</th>
+            </tr>
+            <tbody>
+                {% for p in producto %}
+                <tr>
+                    <td>{{ p.nombre_producto }}</td>
+                    <td>{{ p.stock }}</td>
+                    <td>{{ p.precio_venta }}</td>
+                    <td>
+                        {% if p.imagen %}
+                            <img src="{{ url_for('static', filename='fotos/' + p.imagen) }}" alt="p.descripcion">
+                        {% else %}
+                            <span>Sin imagen disponible</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="modal-body">
+                        {{ p.descripcion }}
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                        <!-- Botón "Agregar al Carrito" -->
+                            <button class="btn-agregar-carrito" data-producto-id="{{ p.id_producto }}" data-precio="{{ p.precio_venta }}">Agregar al Carrito</button>
+                        </div>
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+                <script>
+
+                    const carrito = [];
+
+                    // Función para aumentar la cantidad de un producto en el carrito
+                    function aumentarCantidad(producto_id) {
+                        const index = carrito.findIndex((producto) => producto.id === producto_id);
+                        carrito[index].cantidad++;
+                        actualizarCarrito();
+                    }
+
+                    // Función para disminuir la cantidad de un producto en el carrito
+                    function disminuirCantidad(producto_id) {
+                        const index = carrito.findIndex((producto) => producto.id === producto_id);
+                        if (carrito[index].cantidad > 1) {
+                            carrito[index].cantidad--;
+                        }
+                        else {
+                        // Si la cantidad llega a 1 o menos, elimina el producto del carrito
+                        carrito.splice(producto_id, 1);
+                        }
+                        actualizarCarrito();
+                    }
+
+                    // Función para eliminar un producto del carrito
+                    function eliminarProducto(producto_id) {
+                        const index = carrito.findIndex((producto) => producto.id === producto_id);
+                        carrito.splice(index, 1);
+                        actualizarCarrito();
+                    }
+
+                    // actualizar y mostrar el carrito
+                    function actualizarCarrito() {
+                        const carritoLista = document.getElementById('carrito-lista');
+                        const carritoTotal = document.getElementById('carrito-total');
+
+                        // Limpiar el contenido anterior del carrito
+                        carritoLista.innerHTML = '';
+
+                        let total = 0;
+
+                        // Recorre los productos en el carrito
+                        for (const producto of carrito) {
+                            const itemCarrito = document.createElement('li');
+                            itemCarrito.textContent = `${producto.cantidad} x ${producto.id} - Precio: ${producto.precio * producto.cantidad}`;
+
+                            // Botón para aumentar cantidad
+                            const btnAumentar = document.createElement('button');
+                            btnAumentar.textContent = '+';
+                            btnAumentar.addEventListener('click', () => aumentarCantidad(producto.id));
+
+                            // Botón para disminuir cantidad
+                            const btnDisminuir = document.createElement('button');
+                            btnDisminuir.textContent = '-';
+                            btnDisminuir.addEventListener('click', () => disminuirCantidad(producto.id));
+
+                            // Botón para eliminar producto
+                            const btnEliminar = document.createElement('button');
+                            btnEliminar.textContent = 'Eliminar';
+                            btnEliminar.addEventListener('click', () => eliminarProducto(producto.id));
+
+                            itemCarrito.appendChild(btnAumentar);
+                            itemCarrito.appendChild(btnDisminuir);
+                            itemCarrito.appendChild(btnEliminar);
+                            carritoLista.appendChild(itemCarrito);
+
+                            total += producto.precio * producto.cantidad;
+                        }
+
+                        // Actualiza el total
+                        carritoTotal.textContent = total.toFixed(2);
+                    }
+
+                    $(document).ready(function () {
+                        // Escucha el evento de clic en los botones "Agregar al Carrito"
+                        $(".btn-agregar-carrito").click(function () {
+                            const productoId = $(this).data("producto-id");
+                            const precioProducto = parseFloat($(this).data("precio"));
+                            const cantidad = parseInt(prompt("Ingrese la cantidad:"));
+
+                            if (!isNaN(cantidad) && cantidad > 0) {
+                                // Verifica si el producto ya está en el carrito
+                                const productoExistente = carrito.find((producto) => producto.id === productoId);
+
+                                if (productoExistente) {
+                                    // Si el producto ya está en el carrito, actualiza la cantidad
+                                    productoExistente.cantidad += cantidad;
+                                }
+                                else {
+                                    // Si no está en el carrito, agrégalo
+                                    carrito.push({
+                                        id: productoId,
+                                        precio: precioProducto,
+                                        cantidad: cantidad
+                                    });
+                                }
+
+                                // Actualiza y muestra el carrito
+                                actualizarCarrito();
+
+                                alert(`Producto agregado al carrito: ${cantidad} x ${productoId}`);
+                            }
+                            else {
+                                alert("Cantidad no válida.");
+                            }
+                            // Función para mostrar el carrito
+                            function mostrarCarrito() {
+                              $("#carritoModal").modal("show");
+                            }
+
+                            $(document).ready(function () {
+                              // Manejador de clic para el botón "Ver Carrito"
+                              $("#carrito-link").click(function () {
+                                mostrarCarrito();
+                              });
+                            });
+                        // añadir click event listener para carrito mostrar. Y otro distinto en el modal para hacer el POST request al server para comprar
+                        });
+                    });
+
+                    // Función para obtener el ID del cliente actual
+                    function obtenerIDCliente() {
+                        return ClienteID;
+                    }
+
+                    // Función para obtener la dirección del cliente actual
+                    function obtenerDireccionCliente() {
+                        return clienteDireccion;
+                    }
+
+                    // Función para obtener la fecha actual
+                    function obtenerFechaActual() {
+                        // Obtiene la fecha actual en el formato "YYYY-MM-DD".
+                        const fecha = new Date();
+                        const year = fecha.getFullYear();
+                        const month = String(fecha.getMonth() + 1).padStart(2, '0'); // Agrega ceros iniciales a los meses menores a 10.
+                        const day = String(fecha.getDate()).padStart(2, '0'); // Agrega ceros iniciales a los días menores a 10.
+                        return `${year}-${month}-${day}`;
+                    }
+
+                    // Función para calcular el total del carrito
+                    function calcularTotalCarrito() {
+                        // Calcula el total del carrito sumando los precios de los productos por cantidad.
+                        let total = 0;
+                        for (const producto of carrito) {
+                            total += producto.precio * producto.cantidad;
+                        }
+                        return total;
+                    }
+
+                    // Función para obtener los productos en el carrito
+                    function obtenerProductosCarrito() {
+                        // Crea una lista de productos en el carrito con sus IDs y cantidades.
+                        const productosCarrito = [];
+                        for (const producto of carrito) {
+                            productosCarrito.push({
+                                producto_id: producto.id,
+                                cantidad: producto.cantidad,
+                            });
+                        }
+                        return productosCarrito;
+                    }
+
+                    $("#aceptar-carrito").click(function () {
+                        const confirmacion = confirm("¿La dirección y el nombre del cliente son correctos?");
+
+                        if (confirmacion) {
+                            const idCliente = obtenerIDCliente(); // función para obtener el ID del cliente.
+                            const direccion = obtenerDireccionCliente(); // función para obtener la dirección.
+                            const fechaPedido = obtenerFechaActual(); // función para obtener la fecha actual.
+                            const total = calcularTotalCarrito(); // función para calcular el total del carrito.
+                            const productos = obtenerProductosCarrito(); // función para obtener los productos en el carrito.
+
+                            // Enviar el pedido a la tabla "compras"
+                            const compra = {
+                                cliente_id: idCliente,
+                                direccion_envio: direccion,
+                                total: total,
+                                productos: JSON.stringify(productos),
+                            };
+
+                            // Realiza una solicitud AJAX para registrar la compra
+                            $.ajax({
+                                type: "POST",
+                                url: "/registrar_compra",
+                                data: compra,
+                                success: function (response) {
+                                    if (response.success) {
+                                        alert("Compra registrada con éxito. ID de compra: " + response.compra_id);
+                                    } else {
+                                        alert("Error al registrar la compra.");
+                                    }
+                                },
+                                error: function () {
+                                    alert("Error al registrar la compra.");
+                                },
+                            });
+                        } else {
+                            // Los datos no son correctos, pedir la dirección al usuario.
+                            const nuevaDireccion = prompt("Por favor, ingrese la nueva dirección de envío:");
+
+                            if (nuevaDireccion !== null && nuevaDireccion !== "") {
+                                // El usuario proporcionó una dirección válida, sigue el mismo flujo de registro de compra.
+                            } else {
+                                alert("Debes proporcionar una dirección válida.");
+                            }
+                        }
+                    });
+
+                </script>
+            </tbody>
+        </table>
+    </main>
+</body>
